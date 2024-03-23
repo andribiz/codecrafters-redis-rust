@@ -14,6 +14,7 @@ fn main() {
         match stream {
             Ok(mut stream) => {
                 println!("accepted new connection");
+
                 let _ = stream.write_all(b"+PONG\r\n");
             }
             Err(e) => {
