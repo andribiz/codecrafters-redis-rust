@@ -1,6 +1,6 @@
 use bytes::BytesMut;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
@@ -15,14 +15,16 @@ async fn main() {
         match listener.accept().await {
             Ok((mut stream, _)) => {
                 println!("accepted new connection");
-                loop {
-                    let mut buf = BytesMut::with_capacity(1024);
-                    let len = stream.read_buf(&mut buf).await.expect("Panic");
-                    if len == 0 {
-                        break;
+                tokio::spawn(async move {
+                    loop {
+                        let mut buf = BytesMut::with_capacity(1024);
+                        let len = stream.read_buf(&mut buf).await.expect("Panic");
+                        if len == 0 {
+                            break;
+                        }
+                        let _ = stream.write_all(b"+PONG\r\n").await;
                     }
-                    let _ = stream.write_all(b"+PONG\r\n").await;
-                }
+                });
             }
             Err(e) => {
                 println!("error: {}", e);
