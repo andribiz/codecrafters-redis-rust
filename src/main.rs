@@ -1,6 +1,5 @@
-use std::io::Write;
+use std::io::{Read, Write};
 use std::net::TcpListener;
-use std::net::TcpStream;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -14,8 +13,14 @@ fn main() {
         match stream {
             Ok(mut stream) => {
                 println!("accepted new connection");
-
-                let _ = stream.write_all(b"+PONG\r\n");
+                loop {
+                    let mut buf = [0; 1024];
+                    let len = stream.read(&mut buf).expect("Error read file");
+                    if len == 0 {
+                        break;
+                    }
+                    let _ = stream.write_all(b"+PONG\r\n");
+                }
             }
             Err(e) => {
                 println!("error: {}", e);
