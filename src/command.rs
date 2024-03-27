@@ -33,7 +33,7 @@ impl Command {
                 let value = get(&data, 2)?;
                 let value = Bytes::from(value);
                 let exp = match get(&data, 3) {
-                    Ok(val) => {
+                    Ok(_) => {
                         let exp = get(&data, 4)?;
                         let exp = String::from_utf8(exp)?;
                         let exp = exp.parse::<u64>()?;
