@@ -8,6 +8,7 @@ pub enum Command {
     Echo(String),
     Set(String, Bytes, Option<u64>),
     Get(String),
+    Info(String),
 }
 
 impl Command {
@@ -49,6 +50,11 @@ impl Command {
                 let key = String::from_utf8(key)?;
                 Ok(Command::Get(key))
             }
+            "info" => {
+                let key = get(&data, 1)?;
+                let key = String::from_utf8(key)?;
+                Ok(Command::Info(key))
+            }
             _ => bail!("command not supported"),
         }
     }
@@ -65,6 +71,9 @@ impl Command {
                 Ok(val) => Resp::BulkString(val.to_vec()),
                 Err(_) => Resp::NullBulk,
             },
+            Command::Info(param) => {
+                Resp::BulkString(String::from("role:master").as_bytes().to_vec())
+            }
         }
     }
 }

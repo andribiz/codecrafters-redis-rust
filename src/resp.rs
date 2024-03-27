@@ -35,18 +35,6 @@ impl ToString for Resp {
     }
 }
 
-// impl ToString<Resp> for String {
-//     type Error = &'static str;
-//
-//     fn try_from(value: Resp) -> Result<Self, &'static str> {
-//         match value {
-//             Resp::String(data) => Ok(format!("+{}\r\n", data)),
-//             Resp::Error(data) => Ok(format!("-{}\r\n", data)),
-//             Resp::Integer(data) => Ok(format!(":{}\r\n", data)),
-//         }
-//     }
-// }
-
 impl Resp {
     pub fn decode(src: &mut Cursor<&[u8]>) -> Result<Self> {
         match get_u8(src)? {
