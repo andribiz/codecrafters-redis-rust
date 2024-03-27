@@ -13,6 +13,7 @@ pub enum Resp {
     NullAray,
 }
 
+// TODO: Change to bit operation instead string
 impl ToString for Resp {
     fn to_string(&self) -> String {
         match self {
