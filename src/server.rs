@@ -6,7 +6,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::command::Command;
-use crate::db::{ArcDB, DB};
+use crate::db::{ArcDB, DBMode, DB};
 use crate::resp::Resp;
 
 pub struct Server {
@@ -15,10 +15,15 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(listener: TcpListener) -> Self {
+    pub fn new(listener: TcpListener, mode: DBMode) -> Self {
+        let mut db = DB::new();
+
+        if mode == DBMode::Slave {
+            db = db.slave();
+        }
         Server {
             listener,
-            db: Arc::new(DB::new()),
+            db: Arc::new(db),
         }
     }
 

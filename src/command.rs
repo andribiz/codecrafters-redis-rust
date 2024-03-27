@@ -71,8 +71,8 @@ impl Command {
                 Ok(val) => Resp::BulkString(val.to_vec()),
                 Err(_) => Resp::NullBulk,
             },
-            Command::Info(param) => {
-                Resp::BulkString(String::from("role:master").as_bytes().to_vec())
+            Command::Info(_) => {
+                Resp::BulkString(format!("role:{}", db.mode.to_string()).as_bytes().to_vec())
             }
         }
     }

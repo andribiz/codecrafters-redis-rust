@@ -7,6 +7,21 @@ use std::{
 };
 use tokio::sync::Mutex;
 
+#[derive(PartialEq, Eq)]
+pub enum DBMode {
+    Master,
+    Slave,
+}
+
+impl ToString for DBMode {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Master => String::from("master"),
+            Self::Slave => String::from("slave"),
+        }
+    }
+}
+
 struct Entry {
     data: Bytes,
     expired_at: Option<Instant>,
@@ -15,13 +30,20 @@ pub type ArcDB = Arc<DB>;
 
 pub struct DB {
     shared: Mutex<HashMap<String, Entry>>,
+    pub mode: DBMode,
 }
 
 impl DB {
     pub fn new() -> Self {
         DB {
             shared: Mutex::new(HashMap::new()),
+            mode: DBMode::Master,
         }
+    }
+
+    pub fn slave(mut self) -> Self {
+        self.mode = DBMode::Slave;
+        self
     }
 
     pub async fn get(&self, key: String) -> Result<Bytes> {
