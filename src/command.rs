@@ -6,7 +6,7 @@ use bytes::Bytes;
 pub enum Command {
     Ping,
     Echo(String),
-    Set(String, Bytes),
+    Set(String, Bytes, Option<u64>),
     Get(String),
 }
 
@@ -32,7 +32,17 @@ impl Command {
                 let key = String::from_utf8(key)?;
                 let value = get(&data, 2)?;
                 let value = Bytes::from(value);
-                Ok(Command::Set(key, value))
+                let exp = match get(&data, 3) {
+                    Ok(val) => {
+                        let exp = get(&data, 4)?;
+                        let exp = String::from_utf8(exp)?;
+                        let exp = exp.parse::<u64>()?;
+                        Some(exp)
+                    }
+                    Err(_) => None,
+                };
+
+                Ok(Command::Set(key, value, exp))
             }
             "get" => {
                 let key = get(&data, 1)?;
@@ -47,13 +57,13 @@ impl Command {
         match self {
             Command::Ping => Resp::String(String::from("PONG")),
             Command::Echo(param) => Resp::String(param.to_string()),
-            Command::Set(key, value) => {
-                db.set(key, value).await;
+            Command::Set(key, value, exp) => {
+                db.set(key, value, exp).await;
                 Resp::String(String::from("OK"))
             }
             Command::Get(key) => match db.get(key).await {
                 Ok(val) => Resp::BulkString(val.to_vec()),
-                Err(e) => Resp::Error(e.to_string()),
+                Err(_) => Resp::NullBulk,
             },
         }
     }

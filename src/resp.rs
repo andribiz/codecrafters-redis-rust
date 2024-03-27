@@ -10,6 +10,7 @@ pub enum Resp {
     Integer(i64),
     BulkString(Vec<u8>),
     Array(Vec<Self>),
+    NullBulk,
     NullAray,
 }
 
@@ -29,6 +30,7 @@ impl ToString for Resp {
                 todo!();
             }
             Resp::NullAray => String::from("_\r\n"),
+            Resp::NullBulk => String::from("$-1\r\n"),
         }
     }
 }
@@ -65,7 +67,7 @@ impl Resp {
             b'$' => {
                 let len = get_decimal(src)?;
                 if len == -1 {
-                    return Ok(Resp::NullAray);
+                    return Ok(Resp::NullBulk);
                 } else if len == 0 {
                     return Ok(Resp::BulkString(vec![]));
                 }
